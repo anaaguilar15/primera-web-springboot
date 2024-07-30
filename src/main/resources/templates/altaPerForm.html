@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de persona</title>
+</head>
+<body>
+
+<div align="center">
+    <form th:object="${persona}" th:action="${accion}" method="post">
+        <input type="hidden" th:field="*{id}">
+        <h1>Formulario de Persona</h1>
+        <table border="0" cellpadding="10">
+            <tr>
+                <td>Nombre : </td>
+                <td><input type="text" th:field="*{nombre}"/></td>
+            </tr>
+            <tr>
+                <td>Edad : </td>
+                <td><input type="number" th:field="*{edad}"/></td>
+            </tr>
+            <tr>
+                <td colspan="2"><button type="submit">Guardar</button></td>
+            </tr>
+            <tr>
+                <a href="/personas">Volver al listado de personas</a>
+            </tr>
+        </table>
+    </form>
+</div>
+
+</body>
+</html>
+
+<!-- primera version
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de persona</title>
+</head>
+<body>
+    <h1>Formulario de personas</h1>
+    <form th:object="${persona}" th:action="${accion}" method="post">
+        <input type="hidden" th:field="*{id}"></label><br>
+        <label>Nombre: <input type="text" th:field="*{nombre}"></label><br>
+        <label>Edad: <input type="number" th:field="*{edad}"></label><br>
+        <button type="submit">Guardar</button>
+    </form>
+    <a href="/personas">Volver</a>
+</body>
+</html>
+-->
+
