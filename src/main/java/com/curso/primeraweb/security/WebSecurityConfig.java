@@ -55,15 +55,16 @@ public class WebSecurityConfig {
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(
-                auth -> auth
-                        .requestMatchers("/personas").permitAll()
-                        .requestMatchers("/personas/nuevaPersona").hasAnyRole("ADMIN")
-                        .requestMatchers("/personas/mostrarFormModif/*","/personas/eliminar/*").hasRole("ADMIN")
-                        .anyRequest().authenticated())
-                .formLogin(form->form
+                        auth -> auth
+                                .requestMatchers("/personas").hasAnyAuthority("USER","CREATOR","EDITOR","ADMIN")
+                                .requestMatchers("/personas/nueva").hasAnyAuthority("ADMIN","CREATOR")
+                                .requestMatchers("/personas/editar/*").hasAnyAuthority("ADMIN","EDITOR")
+                                .requestMatchers("/personas/eliminar/*").hasAnyAuthority("ADMIN")
+                                .anyRequest().authenticated())
+                .formLogin(form -> form
                         .loginPage("/login")
                         .permitAll())
-                .logout(l->l.permitAll())
+                .logout(l -> l.permitAll())
                 .exceptionHandling(e -> e.accessDeniedPage("/403"));
         return httpSecurity.build();
     }

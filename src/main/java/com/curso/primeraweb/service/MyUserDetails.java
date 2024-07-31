@@ -1,5 +1,6 @@
 package com.curso.primeraweb.service;
 
+import com.curso.primeraweb.entities.Role;
 import com.curso.primeraweb.entities.User;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,8 +16,13 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(user.getRole());
-        return Arrays.asList(authority);
+        Set<Role> roles = user.getRoles();
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+
+        for(Role role:roles){
+            authorities.add(new SimpleGrantedAuthority(role.getNombre()));
+        }
+        return authorities;
     }
 
     @Override

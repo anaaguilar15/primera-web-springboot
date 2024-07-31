@@ -8,7 +8,12 @@
 <body>
 
 <div align="center">
-    <p th:inline="text">Bienvenido <span sec:authentication="name"></span></p>
+    <div sec:authorize="isAuthenticated()">
+        Bienvenido <b><span sec:authentication="name">Username</span></b>
+        &nbsp;
+        <b><span sec:authentication="principal.authorities">Roles</span></b>
+    </div>
+
     <form th:action="@{/logout}" method="post">
         <input type="submit" value="Salir">
     </form>
@@ -18,20 +23,20 @@
             <th>ID</th>
             <th>Nombre</th>
             <th>Edad</th>
-            <th sec:authorize="hasRole('ADMIN')">Acciones</th>
+            <th sec:authorize="hasAnyAuthority('ADMIN','EDITOR')">Acciones</th>
         </tr>
         <tr th:each="persona : ${listaPersonas}">
             <td th:text="${persona.id}"></td>
             <td th:text="${persona.nombre}"></td>
             <td th:text="${persona.edad}"></td>
-            <td sec:authorize="hasRole('ADMIN')">
+            <td sec:authorize="hasAnyAuthority('ADMIN','EDITOR')">
                 <a th:href="@{/personas/mostrarFormModif/{id}(id=${persona.id})}">Editar</a>
-                <a th:href="@{/personas/eliminar/{id}(id=${persona.id})}">Eliminar</a>
+                <a sec:authorize="hasAuthority('ADMIN')" th:href="@{/personas/eliminar/{id}(id=${persona.id})}">Eliminar</a>
             </td>
         </tr>
     </table>
 
-    <div sec:authorize="hasRole('ADMIN')">
+    <div sec:authorize="hasAnyAuthority('CREATOR','ADMIN')">
         <a href="/personas/nuevaPersona">Nueva persona</a>
     </div>
 
