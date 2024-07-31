@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/personas")
+@RequestMapping({"/personas","/"})
 public class PersonaController {
     @Autowired
     private PersonaService personaService;
