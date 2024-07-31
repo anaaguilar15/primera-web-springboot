@@ -1,42 +1,50 @@
 package com.curso.primeraweb.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.curso.primeraweb.service.impl.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
-import javax.sql.DataSource;
 
 @Configuration //registra beans
 @EnableWebSecurity //habilita la seguridad y permite trabajar con la db?? si aplica ambas anotaciones es para desactivar la configuración de seguridad de la aplicación web predeterminada y agregar la suya propia.
 public class WebSecurityConfig {
 
-    @Autowired
-    private DataSource dataSource;
-
-    //metodo para configurar el proceso de autenticacion
-    // validacion desde la base de datos con jdbc
-    @Autowired
-    public void configAutentication (AuthenticationManagerBuilder builder) throws Exception {
-
-        builder.jdbcAuthentication().passwordEncoder(new BCryptPasswordEncoder())
-                .dataSource(dataSource)
-                .usersByUsernameQuery("select username, password, enabled from users where username=?")//para cargar los usuarios
-                .authoritiesByUsernameQuery("select username, role from users where username=?");//carga roles
-
+    @Bean
+    public UserDetailsService userDetailsService(){
+        return new UserDetailsServiceImpl();
     }
 
-    //metodo encriptador o {bcrypt}
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public BCryptPasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
+    //DaoAuthenticationProvider es una implementacion del AuthenticationProvider
+    //Se utiliza  para autenticar usuarios en bases de datos
+    //Es responsable de verificar las credenciales del usuario y autenticar el usuario
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService());
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return authenticationProvider;
+    }
 
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder = httpSecurity.getSharedObject(AuthenticationManagerBuilder.class);
+        //cuando se realiza una solicitud el administrador de autenticación usará el provider
+        authenticationManagerBuilder.authenticationProvider(authenticationProvider());
+        return authenticationManagerBuilder.build();
+    }
+
+    //Define las reglas de autorizacion para las solicitudes HTTP
     // autorizacion de rutas por rol,
     // parametros con *,
     // si no cumple manda la exepccion,
