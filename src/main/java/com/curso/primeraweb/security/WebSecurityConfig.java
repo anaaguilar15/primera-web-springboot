@@ -1,38 +1,40 @@
 package com.curso.primeraweb.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import javax.sql.DataSource;
+
 @Configuration //registra beans
+@EnableWebSecurity //habilita la seguridad y permite trabajar con la db?? si aplica ambas anotaciones es para desactivar la configuración de seguridad de la aplicación web predeterminada y agregar la suya propia.
 public class WebSecurityConfig {
+
+    @Autowired
+    private DataSource dataSource;
+
+    //metodo para configurar el proceso de autenticacion
+    // validacion desde la base de datos con jdbc
+    @Autowired
+    public void configAutentication (AuthenticationManagerBuilder builder) throws Exception {
+
+        builder.jdbcAuthentication().passwordEncoder(new BCryptPasswordEncoder())
+                .dataSource(dataSource)
+                .usersByUsernameQuery("select username, password, enabled from users where username=?")//para cargar los usuarios
+                .authoritiesByUsernameQuery("select username, role from users where username=?");//carga roles
+
+    }
+
     //metodo encriptador o {bcrypt}
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
-    }
-    //usuarios registrados en memoria
-    @Bean
-    public InMemoryUserDetailsManager userDetailsManager(){
-        UserDetails user1 = User.builder()
-                .username("user")
-                .password("$2a$10$55Ns1Itbqf/kffZY9Ru3o.Gudseuhuwz.fm4wWoT7T0GgoR5hoqqK")
-                .roles("USER")
-                .build();
-
-        UserDetails user2 = User.builder()
-                .username("admin")
-                .password("$2a$10$55Ns1Itbqf/kffZY9Ru3o.Gudseuhuwz.fm4wWoT7T0GgoR5hoqqK")
-                .roles("ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user1,user2);
     }
 
     // autorizacion de rutas por rol,
